@@ -4,64 +4,49 @@ import { createStore } from 'redux';
 import expect from 'expect';
 import deepFreeze from 'deep-freeze'
 
-const counter = (state = 0, action) => {
-	if (action.type === 'increment'){
-		console.log('incrementing state');
-		return state + 1;
-	} else if (action.type === 'decrement'){
-		console.log('decrementing state');
-		return state - 1;
-	} else {
-		return state;
+const todos = (state = [], action) => {
+	switch (action.type) {
+		case 'ADD_TODO':
+			console.log('adding todo');
+			return [
+				...state,
+				{
+					id: action.id,
+					text: action.text,
+					completed: false
+				}
+			];
+		default:
+			console.log("default");
+			return state;
 	}
 }
 
-const Counter = ({value, onIncrement, onDecrement}) => (
-	<div>
-		<h1>{value}</h1>
-		<button onClick = {onIncrement}>+</button>
-		<button onClick = {onDecrement}>-</button>
-	</div>
-);
+const testTodos = () => {
+	const stateBefore = {};
 
-const store = createStore(counter);
+	const action = {
+		id: 0,
+		type: 'ADD_TODO',
+		text: 'Learn redux'
+	};
 
-const render = () => {
-	ReactDOM.render(
-		<Counter 
-			value = { store.getState()}
-			onIncrement = { () =>
-				store.dispatch({ type: 'increment' })
-			}
-			onDecrement = { () =>
-				store.dispatch({ type: 'decrement' })
-			}
-		/>,
-		document.getElementById('root')
-	);
-}
-
-store.subscribe(render);
-render();
-
-const addCounter = (list) => {
-	return [...list, 0];
-}
-
-const removeCounter = (list, index) => {
-	return [
-		...list.slice(0, index),
-		...list.slice(index + 1)
+	const stateAfter = [
+		{
+			id: 0,
+			text: 'Learn redux',
+			completed: false
+		}
 	];
+
+	deepFreeze(stateBefore);
+
+	expect(
+		todos(stateBefore, action)
+	).toEqual(stateAfter);
 }
 
-const incrementCounter = (list, index) => {
-	return [
-		...list.slice(0, index),
-		list[index],
-		...list.slice(index + 1)
-	];
-}
+testTodos();
 
 const toggleToDo = (todo) => {
 	return {
@@ -70,28 +55,6 @@ const toggleToDo = (todo) => {
 	};
 }
 
-const testToggleToDo = () => {
-
-	const toDoBefore = {
-		id: 0,
-		text: 'learn redux',
-		completed: true
-	};
-
-	const toDoAfter = {
-		id: 0,
-		text: 'learn redux',
-		completed: false
-	};
-
-	deepFreeze(toDoBefore);
-
-	expect(
-		toggleToDo(toDoBefore)
-	).toEqual(toDoAfter);
-}
-
-testToggleToDo();
 console.log('tests passed!');
 
 
