@@ -7,7 +7,6 @@ import deepFreeze from 'deep-freeze'
 const todos = (state = [], action) => {
 	switch (action.type) {
 		case 'ADD_TODO':
-			console.log('adding todo');
 			return [
 				...state,
 				{
@@ -16,14 +15,32 @@ const todos = (state = [], action) => {
 					completed: false
 				}
 			];
+		case 'TOGGLE_TODO':
+			return state.map(todo => {
+				if(todo.id !== action.id){
+					return todo;
+				}
+
+				return {
+					... todo,
+					completed: !todo.completed
+				}
+			});
+			return [
+				...state.slice(0, action.id),
+				{
+					...state[action.id],
+					completed: !state[action.id].completed
+				},
+				...state.slice(action.id + 1)
+			];
 		default:
-			console.log("default");
 			return state;
 	}
 }
 
 const testTodos = () => {
-	const stateBefore = {};
+	const stateBefore = [];
 
 	const action = {
 		id: 0,
@@ -46,7 +63,48 @@ const testTodos = () => {
 	).toEqual(stateAfter);
 }
 
+const testToggleTodos = () => {
+	const stateBefore = [
+		{
+			id: 0,
+			text: 'Learn redux',
+			completed: false
+		},
+		{
+			id: 1,
+			text: 'Go shopping',
+			completed: false
+		}
+	];
+
+	const action = {
+		id: 1,
+		type: 'TOGGLE_TODO'
+	};
+
+	const stateAfter = [
+		{
+			id: 0,
+			text: 'Learn redux',
+			completed: false
+		},
+		{
+			id: 1,
+			text: 'Go shopping',
+			completed: true
+		}
+	];
+
+	deepFreeze(stateBefore);
+	deepFreeze(action);
+
+	expect(
+		todos(stateBefore, action)
+	).toEqual(stateAfter);
+}
+
 testTodos();
+testToggleTodos();
 
 const toggleToDo = (todo) => {
 	return {
