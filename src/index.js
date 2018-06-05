@@ -40,6 +40,38 @@ const todos = (state = [], action) => {
 	}
 }
 
+const visibilityFilter = (state = 'SHOW_ALL', action) => {
+	switch(action.type){
+		case 'SET_VISIBILITY_FILTER':
+			return action.type;
+		default:
+			return state;
+	}
+}
+
+const todoApp = (state = {}, action) => {
+	return {
+		todos: todos(
+			state.todos, 
+			action
+		),
+		visibilityFilter: visibilityFilter(
+			state.visibilityFilter,
+			action
+		)
+	};
+}
+
+const store = createStore(todoApp);
+
+// console.log(store.getState());
+// store.dispatch({
+// 	id: 0,
+// 	text: 'learn react and redux',
+// 	type: 'ADD_TODO'
+// });
+// console.log(store.getState());
+
 const testTodos = () => {
 	const stateBefore = [];
 
