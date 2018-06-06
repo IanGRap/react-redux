@@ -54,8 +54,6 @@ const todoApp = combineReducers({
 	visibilityFilter
 });
 
-const store = createStore(todoApp);
-
 const Link = ({
 	active,
 	onClick,
@@ -75,6 +73,7 @@ const Link = ({
 
 class FilterLink extends Component {
 	componentDidMount(){
+		const {store} = this.props;
 		this.unsubscribe = store.subscribe( () =>
 			this.forceUpdate()
 		);
@@ -86,6 +85,7 @@ class FilterLink extends Component {
 
 	render(){
 		const props = this.props;
+		const {store} = props;
 		const state = store.getState();
 
 		return(
@@ -138,7 +138,7 @@ const TodoList = ({
 	</ul>
 );
 
-const AddTodo = () => {
+const AddTodo = ({store}) => {
 	let input;
 	return (<div>
 		<input ref = {node =>{
@@ -157,23 +157,26 @@ const AddTodo = () => {
 	</div>);
 };
 
-const Footer = () => (
+const Footer = ({store}) => (
 	<p>
 		Show
 		<FilterLink 
 			filter = 'SHOW_ALL'
+			store = {store}
 		>
 			All
 		</FilterLink>
 		{', '}
 		<FilterLink 
 			filter = 'SHOW_COMPLETED'
+			store = {store}
 		>
 			Completed
 		</FilterLink>
 		{', '}
 		<FilterLink 
 			filter = 'SHOW_ACTIVE'
+			store = {store}
 		>
 			Active
 		</FilterLink>
@@ -182,6 +185,7 @@ const Footer = () => (
 
 class VisibleTodoList extends Component{
 	componentDidMount(){
+		const {store} = this.props;
 		this.unsubscribe = store.subscribe( () =>
 			this.forceUpdate()
 		);
@@ -193,7 +197,8 @@ class VisibleTodoList extends Component{
 
 	render(){
 		const props = this.props;
-		const state = store.getState();
+		const {store} = props;
+		const state = props.store.getState();
 
 		return(
 			<TodoList
@@ -213,11 +218,13 @@ class VisibleTodoList extends Component{
 }
 
 let todoAppId = 0;
-const TodoApp = () => (
+const TodoApp = ({
+	store
+}) => (
 	<div>
-		<AddTodo/>
-		<VisibleTodoList/>
-		<Footer/>
+		<AddTodo store = {store}/>
+		<VisibleTodoList store = {store}/>
+		<Footer store = {store}/>
 	</div>
 );
 
@@ -238,7 +245,9 @@ const getVisibleTodos = (
 }
 	
 ReactDOM.render(
-	<TodoApp/>,
+	<TodoApp
+		store = {createStore(todoApp)}
+	/>,
 	document.getElementById('root')
 );
 
