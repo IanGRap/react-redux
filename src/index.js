@@ -56,26 +56,55 @@ const todoApp = combineReducers({
 
 const store = createStore(todoApp);
 
-const FilterLink = ({
-	filter,
-	currentFilter,
+const Link = ({
+	active,
 	onClick,
 	children
 }) => {
-	if(filter === currentFilter){
+	if(active){
 		return <span> {children} </span>;
 	}
 	return <a href = '#' 
 		onClick = {e => {
 			e.preventDefault();
-			onClick(filter);
-			// store.dispatch({
-			// 	type: 'SET_VISIBILITY_FILTER',
-			// 	filter
-			// });
+			onClick();
 		}}>
 			{children}
 		</a>
+}
+
+class FilterLink extends Component {
+	componentDidMount(){
+		this.unsubscribe = store.subscribe( () =>
+			this.forceUpdate()
+		);
+	}
+
+	componentWillUnmount(){
+		this.unsubsribe();
+	}
+
+	render(){
+		const props = this.props;
+		const state = store.getState();
+
+		return(
+			<Link
+				active = {
+					props.filter ===
+					state.visibilityFilter
+				}
+				onClick = {() => 
+					store.dispatch({
+						type: 'SET_VISIBILITY_FILTER',
+						filter: props.filter
+					})
+				}
+			>	
+				{props.children}
+			</Link>
+		);
+	}
 }
 
 const Todo = ({
@@ -129,32 +158,23 @@ const AddTodo = ({
 	</div>);
 };
 
-const Footer = ({
-	visibilityFilter,
-	onFilterClick
-}) => (
+const Footer = () => (
 	<p>
 		Show
 		<FilterLink 
 			filter = 'SHOW_ALL'
-			currentFilter = {visibilityFilter}
-			onClick = {onFilterClick}
 		>
 			All
 		</FilterLink>
 		{', '}
 		<FilterLink 
 			filter = 'SHOW_COMPLETED'
-			currentFilter = {visibilityFilter}
-			onClick = {onFilterClick}
 		>
 			Completed
 		</FilterLink>
 		{', '}
 		<FilterLink 
 			filter = 'SHOW_ACTIVE'
-			currentFilter = {visibilityFilter}
-			onClick = {onFilterClick}
 		>
 			Active
 		</FilterLink>
@@ -165,7 +185,7 @@ let todoAppId = 0;
 const TodoApp = ({
 	todos,
 	visibilityFilter
-}) => {
+}) => (
 	<div>
 		<AddTodo 
 			onAddClick = {text =>
@@ -188,17 +208,9 @@ const TodoApp = ({
 				})
 			}
 		/>
-		<Footer 
-			visibilityFilter
-			onFilterClick = { filter => 
-				store.dispatch({
-					type: 'SET_VISIBILITY_FILTER',
-					filter
-				})
-			}
-		/>
+		<Footer/>
 	</div>
-}
+);
 
 const getVisibleTodos = (
 	filter,
