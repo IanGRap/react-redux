@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import { createStore } from 'redux';
 import { combineReducers } from 'redux';
@@ -57,90 +57,47 @@ const todoApp = combineReducers({
 
 const store = createStore(todoApp);
 
-// console.log(store.getState());
-// store.dispatch({
-// 	id: 0,
-// 	text: 'learn react and redux',
-// 	type: 'ADD_TODO'
-// });
-// console.log(store.getState());
-
-const testTodos = () => {
-	const stateBefore = [];
-
-	const action = {
-		id: 0,
-		type: 'ADD_TODO',
-		text: 'Learn redux'
-	};
-
-	const stateAfter = [
-		{
-			id: 0,
-			text: 'Learn redux',
-			completed: false
-		}
-	];
-
-	deepFreeze(stateBefore);
-
-	expect(
-		todos(stateBefore, action)
-	).toEqual(stateAfter);
+let todoAppId = 0;
+class TodoApp extends Component {
+	render(){
+		return (
+			<div>
+				<input ref = {node =>{
+					this.input = node;
+				}} />
+				<button onClick = {() =>{
+					store.dispatch({
+						id: todoAppId++,
+						text: this.input.value,
+						type:  'ADD_TODO'
+					});
+					this.input.value = '';
+				}}>
+					add todo
+				</button>
+				<ul>
+					{this.props.todos.map(todo => 
+						<li key = {todo.id}> 
+							{todo.text}
+						</li>
+					)}
+				</ul>
+			</div>
+		);
+	}
 }
 
-const testToggleTodos = () => {
-	const stateBefore = [
-		{
-			id: 0,
-			text: 'Learn redux',
-			completed: false
-		},
-		{
-			id: 1,
-			text: 'Go shopping',
-			completed: false
-		}
-	];
+const render = () => {
+	ReactDOM.render(
+		<TodoApp 
+			todos = {store.getState().todos}
+		/>,
+		document.getElementById('root')
+	);
+};
 
-	const action = {
-		id: 1,
-		type: 'TOGGLE_TODO'
-	};
-
-	const stateAfter = [
-		{
-			id: 0,
-			text: 'Learn redux',
-			completed: false
-		},
-		{
-			id: 1,
-			text: 'Go shopping',
-			completed: true
-		}
-	];
-
-	deepFreeze(stateBefore);
-	deepFreeze(action);
-
-	expect(
-		todos(stateBefore, action)
-	).toEqual(stateAfter);
-}
-
-testTodos();
-testToggleTodos();
-
-const toggleToDo = (todo) => {
-	return {
-		...todo,
-		completed: !todo.completed
-	};
-}
-
-console.log('tests passed!');
-
+store.subscribe(render);
+render();
 
 
 
