@@ -5,6 +5,7 @@ import { combineReducers } from 'redux';
 import expect from 'expect';
 import deepFreeze from 'deep-freeze'
 import PropTypes from 'prop-types';
+import { Provider } from 'react-redux';
 
 const todo = (state, action) => {
 	switch (action.type) {
@@ -250,21 +251,6 @@ const getVisibleTodos = (
 			return todos;
 	}
 }
-
-class Provider extends Component {
-	getChildContext(){
-		return {
-			store: this.props.store
-		};
-	}
-
-	render(){
-		return(this.props.children);
-	}
-}
-Provider.childContextTypes = {
-	store: PropTypes.object
-};
 	
 ReactDOM.render(
 	<Provider store = {createStore(todoApp)} >
