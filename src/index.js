@@ -73,44 +73,32 @@ const Link = ({
 		</a>
 }
 
-class FilterLink extends Component {
-	componentDidMount(){
-		const {store} = this.context;
-		this.unsubscribe = store.subscribe( () =>
-			this.forceUpdate()
-		);
-	}
-
-	componentWillUnmount(){
-		this.unsubsribe();
-	}
-
-	render(){
-		const props = this.props;
-		const {store} = this.context;
-		const state = store.getState();
-
-		return(
-			<Link
-				active = {
-					props.filter ===
-					state.visibilityFilter
-				}
-				onClick = {() => 
-					store.dispatch({
-						type: 'SET_VISIBILITY_FILTER',
-						filter: props.filter
-					})
-				}
-			>	
-				{props.children}
-			</Link>
-		);
-	}
+const mapStateToFilterLinkProps = (
+	state,
+	ownProps
+) => {
+	return({
+		active:
+			ownProps.filter ===
+			state.visibilityFilter
+	});
 }
-FilterLink.contextTypes = {
-	store: PropTypes.object
-};
+const mapDispatchToFilterLink = (
+	dispatch,
+	ownProps
+) => {
+	return({
+		onClick: () => 
+			dispatch({
+				type: 'SET_VISIBILITY_FILTER',
+				filter: ownProps.filter
+			})
+	});
+}
+const FilterLink = connect (
+	mapStateToFilterLinkProps,
+	mapDispatchToFilterLink
+)(Link);
 
 const Todo = ({
 	onClick,
