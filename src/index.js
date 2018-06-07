@@ -143,14 +143,15 @@ const TodoList = ({
 	</ul>
 );
 
-const AddTodo = (props, {store}) => {
+let todoAppId = 0;
+let AddTodo = ({dispatch}) => {
 	let input;
 	return (<div>
 		<input ref = {node =>{
 			input = node;
 		}} />
 		<button onClick = {() =>{
-			store.dispatch({
+			dispatch({
 				id: todoAppId++,
 				type:  'ADD_TODO',
 				text: input.value
@@ -161,9 +162,7 @@ const AddTodo = (props, {store}) => {
 		</button>
 	</div>);
 };
-AddTodo.contextTypes = {
-	store: PropTypes.object
-};
+AddTodo = connect()(AddTodo);
 
 const Footer = () => (
 	<p>
@@ -188,7 +187,7 @@ const Footer = () => (
 	</p>
 );
 
-const mapStateToProps = (state) => {
+const mapStateToToDoListProps = (state) => {
 	return ({
 		todos: getVisibleTodos(
 			state.visibilityFilter,
@@ -196,8 +195,7 @@ const mapStateToProps = (state) => {
 		)
 	});
 }
-
-const mapDispatchToProps = (dispatch) => {
+const mapDispatchToToDoListProps = (dispatch) => {
 	return ({
 		onTodoClick: (id) => {
 			dispatch({
@@ -207,42 +205,11 @@ const mapDispatchToProps = (dispatch) => {
 		}
 	});
 }
-
 const VisibleTodoList = connect(
-	mapStateToProps,
-	mapDispatchToProps
+	mapStateToToDoListProps,
+	mapDispatchToToDoListProps
 )(TodoList);
 
-// class VisibleTodoList extends Component{
-// 	componentDidMount(){
-// 		const {store} = this.context;
-// 		this.unsubscribe = store.subscribe( () =>
-// 			this.forceUpdate()
-// 		);
-// 	}
-
-// 	componentWillUnmount(){
-// 		this.unsubsribe();
-// 	}
-
-// 	render(){
-// 		const props = this.props;
-// 		const {store} = this.context;
-// 		const state = store.getState();
-
-// 		return(
-// 			<TodoList
-// 				todos = {}
-// 				onTodoClick = {}
-// 			/>
-// 		);
-// 	}
-// }
-// VisibleTodoList.contextTypes = {
-// 	store: PropTypes.object
-// };
-
-let todoAppId = 0;
 const TodoApp = ({
 	store
 }) => (
