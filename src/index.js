@@ -5,7 +5,7 @@ import { combineReducers } from 'redux';
 import expect from 'expect';
 import deepFreeze from 'deep-freeze'
 import PropTypes from 'prop-types';
-import { Provider } from 'react-redux';
+import { Provider, connect } from 'react-redux';
 
 const todo = (state, action) => {
 	switch (action.type) {
@@ -188,42 +188,59 @@ const Footer = () => (
 	</p>
 );
 
-class VisibleTodoList extends Component{
-	componentDidMount(){
-		const {store} = this.context;
-		this.unsubscribe = store.subscribe( () =>
-			this.forceUpdate()
-		);
-	}
-
-	componentWillUnmount(){
-		this.unsubsribe();
-	}
-
-	render(){
-		const props = this.props;
-		const {store} = this.context;
-		const state = store.getState();
-
-		return(
-			<TodoList
-				todos = {getVisibleTodos(
-					state.visibilityFilter,
-					state.todos
-				)}
-				onTodoClick = { id => 
-					store.dispatch({
-						type: 'TOGGLE_TODO',
-						id
-					})
-				}
-			/>
-		);
-	}
+const mapStateToProps = (state) => {
+	return ({
+		todos: getVisibleTodos(
+			state.visibilityFilter,
+			state.todos
+		)
+	});
 }
-VisibleTodoList.contextTypes = {
-	store: PropTypes.object
-};
+
+const mapDispatchToProps = (dispatch) => {
+	return ({
+		onTodoClick: (id) => {
+			dispatch({
+				type: 'TOGGLE_TODO',
+				id
+			});
+		}
+	});
+}
+
+const VisibleTodoList = connect(
+	mapStateToProps,
+	mapDispatchToProps
+)(TodoList);
+
+// class VisibleTodoList extends Component{
+// 	componentDidMount(){
+// 		const {store} = this.context;
+// 		this.unsubscribe = store.subscribe( () =>
+// 			this.forceUpdate()
+// 		);
+// 	}
+
+// 	componentWillUnmount(){
+// 		this.unsubsribe();
+// 	}
+
+// 	render(){
+// 		const props = this.props;
+// 		const {store} = this.context;
+// 		const state = store.getState();
+
+// 		return(
+// 			<TodoList
+// 				todos = {}
+// 				onTodoClick = {}
+// 			/>
+// 		);
+// 	}
+// }
+// VisibleTodoList.contextTypes = {
+// 	store: PropTypes.object
+// };
 
 let todoAppId = 0;
 const TodoApp = ({
