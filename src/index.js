@@ -6,6 +6,8 @@ import expect from 'expect';
 import deepFreeze from 'deep-freeze'
 import PropTypes from 'prop-types';
 import { Provider, connect } from 'react-redux';
+import { DragSource } from 'react-dnd';
+//import { ItemTypes } from './Constants';
 
 const todo = (state, action) => {
 	switch (action.type) {
@@ -51,6 +53,15 @@ const visibilityFilter = (state = 'SHOW_ALL', action) => {
 	}
 }
 
+const sortingFilter = (state = 'NONE', action) => {
+	switch(action.type){
+		case 'SET_SORTING_FILTER':
+			return action.filter;
+		default:
+			return state;
+	}
+}
+
 let todoAppId = 0;
 const addTodo = (text) => {
 	return {
@@ -74,9 +85,17 @@ const toggleTodo = (id) => {
 	}
 }
 
+const setSortingFilter = (props) => {
+	return {
+		type: 'SET_SORTING_FILTER',
+		filter: props.filter
+	}
+}
+
 const todoApp = combineReducers({
 	todos,
-	visibilityFilter
+	visibilityFilter,
+	sortingFilter
 });
 
 const Link = ({
@@ -131,7 +150,8 @@ const Todo = ({
 			textDecoration: completed ?
 				'line-through' :
 				'none'
-		}}> 
+		}}
+	>
 		{text}
 	</li>
 )
@@ -191,11 +211,16 @@ const Footer = () => (
 );
 
 const mapStateToToDoListProps = (state) => {
+	let todos = getVisibleTodos(
+		state.visibilityFilter,
+		state.todos
+	);
+	todos = sortTodos(
+		state.sortingFilter,
+		todos
+	);
 	return ({
-		todos: getVisibleTodos(
-			state.visibilityFilter,
-			state.todos
-		)
+		todos
 	});
 }
 const mapDispatchToToDoListProps = (dispatch) => {
@@ -232,6 +257,43 @@ const getVisibleTodos = (
 		case 'SHOW_COMPLETED':
 			return todos.filter( todo => todo.completed);
 		default:
+			return todos;
+	}
+}
+
+const sortTodos = (
+	filter,
+	todos
+) => {
+	switch(filter){
+		case 'ALPHABETICAL':
+			return todos.sort( (a, b) => {
+				console.log('a: ');
+				console.log(a);
+				console.log('b: ');
+				console.log(b);
+				return a.text - b.text;
+			});
+		case 'CREATED':
+			return todos;
+		default:
+			console.log('before sort:');
+			console.log(todos);
+			todos.sort( (a, b) => {
+				console.log('default');
+				console.log('a: ');
+				console.log(a);
+				console.log('b: ');
+				console.log(b);
+				console.log('a.text:');
+				console.log(a.text);
+				let value = a.text > b.text;
+				console.log('value:');
+				console.log(value);
+				return value;
+			});
+			console.log('after sort:');
+			console.log(todos);
 			return todos;
 	}
 }
