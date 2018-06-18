@@ -15,6 +15,7 @@ const todo = (state, action) => {
 			return {
 				id: action.id,
 				text: action.text,
+				due_date: action.due_date,
 				completed: false
 			};
 		case 'TOGGLE_TODO':
@@ -63,10 +64,11 @@ const sortingFilter = (state = 'NONE', action) => {
 }
 
 let todoAppId = 0;
-const addTodo = (text) => {
+const addTodo = (text, date) => {
 	return {
 		id: todoAppId++,
 		type:  'ADD_TODO',
+		due_date: date,
 		text
 	}
 }
@@ -98,6 +100,50 @@ const todoApp = combineReducers({
 	sortingFilter
 });
 
+const Todo = ({
+	onClick,
+	completed,
+	text,
+	date
+}) => {
+	let name = <span>{text + ' '}</span>;
+	let date_text = undefined;
+	if(date !== undefined)
+		date_text = <span>Due Date</span>;
+	return <li
+		onClick = { onClick }
+		style = {{
+			textDecoration: completed ?
+				'line-through' :
+				'none'
+		}}
+	>
+		{name}
+		{date_text}
+	</li>;
+}
+
+let AddTodo = ({dispatch}) => {
+	let text_input;
+	let day_input;
+	let month_input;
+	let year_input;
+	let undefined_dates = 0;
+	return (<div>
+		<input ref = {node =>{
+			text_input = node;
+		}} />
+		<button onClick = {() =>{
+			dispatch(addTodo(text_input.value, undefined));
+			text_input.value = '';
+		}}>
+			add todo
+		</button>
+	</div>);
+};
+AddTodo = connect()(AddTodo);
+
+// Links
 const Link = ({
 	active,
 	onClick,
@@ -114,7 +160,6 @@ const Link = ({
 			{children}
 		</a>
 }
-
 const mapStateToFilterLinkProps = (
 	state,
 	ownProps
@@ -139,54 +184,6 @@ const FilterLink = connect (
 	mapDispatchToFilterLink
 )(Link);
 
-const Todo = ({
-	onClick,
-	completed,
-	text
-}) => (
-	<li
-		onClick = { onClick }
-		style = {{
-			textDecoration: completed ?
-				'line-through' :
-				'none'
-		}}
-	>
-		{text}
-	</li>
-)
-
-const TodoList = ({
-	todos,
-	onTodoClick
-}) => (
-	<ul>
-		{todos.map(todo => 
-			<Todo
-				key = {todo.id}
-				{...todo}
-				onClick = { () => onTodoClick(todo.id) }
-			/>
-		)}
-	</ul>
-);
-
-let AddTodo = ({dispatch}) => {
-	let input;
-	return (<div>
-		<input ref = {node =>{
-			input = node;
-		}} />
-		<button onClick = {() =>{
-			dispatch(addTodo(input.value));
-			input.value = '';
-		}}>
-			add todo
-		</button>
-	</div>);
-};
-AddTodo = connect()(AddTodo);
-
 const Footer = () => (
 	<p>
 		Show
@@ -210,6 +207,21 @@ const Footer = () => (
 	</p>
 );
 
+//todo list
+const TodoList = ({
+	todos,
+	onTodoClick
+}) => (
+	<ul>
+		{todos.map(todo => 
+			<Todo
+				key = {todo.id}
+				{...todo}
+				onClick = { () => onTodoClick(todo.id) }
+			/>
+		)}
+	</ul>
+);
 const mapStateToToDoListProps = (state) => {
 	let todos = getVisibleTodos(
 		state.visibilityFilter,
@@ -268,32 +280,13 @@ const sortTodos = (
 	switch(filter){
 		case 'ALPHABETICAL':
 			return todos.sort( (a, b) => {
-				console.log('a: ');
-				console.log(a);
-				console.log('b: ');
-				console.log(b);
-				return a.text - b.text;
+				return a.text > b.text;
 			});
 		case 'CREATED':
 			return todos;
+		case 'DATE':
+			return todos;
 		default:
-			console.log('before sort:');
-			console.log(todos);
-			todos.sort( (a, b) => {
-				console.log('default');
-				console.log('a: ');
-				console.log(a);
-				console.log('b: ');
-				console.log(b);
-				console.log('a.text:');
-				console.log(a.text);
-				let value = a.text > b.text;
-				console.log('value:');
-				console.log(value);
-				return value;
-			});
-			console.log('after sort:');
-			console.log(todos);
 			return todos;
 	}
 }
