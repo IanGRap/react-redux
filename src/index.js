@@ -12,6 +12,13 @@ import { DragSource } from 'react-dnd';
 const todo = (state, action) => {
 	switch (action.type) {
 		case 'ADD_TODO':
+			console.log('made a todo:');
+			console.log({
+				id: action.id,
+				text: action.text,
+				due_date: action.due_date,
+				completed: false
+			});
 			return {
 				id: action.id,
 				text: action.text,
@@ -104,12 +111,12 @@ const Todo = ({
 	onClick,
 	completed,
 	text,
-	date
+	due_date
 }) => {
-	let name = <span>{text + ' '}</span>;
-	let date_text = undefined;
-	if(date !== undefined)
-		date_text = <span>Due Date</span>;
+	let description_text = <span>{text + ' '}</span>;
+	let date_text = due_date !== undefined?
+		<span>Due: {due_date}</span>:
+		undefined;
 	return <li
 		onClick = { onClick }
 		style = {{
@@ -118,24 +125,30 @@ const Todo = ({
 				'none'
 		}}
 	>
-		{name}
+		{description_text}
 		{date_text}
 	</li>;
 }
 
 let AddTodo = ({dispatch}) => {
 	let text_input;
-	let day_input;
-	let month_input;
-	let year_input;
-	let undefined_dates = 0;
+	let date_input;
 	return (<div>
 		<input ref = {node =>{
 			text_input = node;
 		}} />
+		<input ref = {node =>{
+			date_input = node;
+		}} />
 		<button onClick = {() =>{
-			dispatch(addTodo(text_input.value, undefined));
-			text_input.value = '';
+			if(text_input.value !== ''){
+				if(date_input.value  === '')
+					dispatch(addTodo(text_input.value, undefined));
+				else
+					dispatch(addTodo(text_input.value, date_input.value));
+				text_input.value = '';
+				date_input.value = '';
+			}
 		}}>
 			add todo
 		</button>
@@ -213,7 +226,8 @@ const TodoList = ({
 	onTodoClick
 }) => (
 	<ul>
-		{todos.map(todo => 
+		{
+			todos.map(todo => 
 			<Todo
 				key = {todo.id}
 				{...todo}
