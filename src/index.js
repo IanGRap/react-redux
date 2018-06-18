@@ -12,13 +12,6 @@ import { DragSource } from 'react-dnd';
 const todo = (state, action) => {
 	switch (action.type) {
 		case 'ADD_TODO':
-			console.log('made a todo:');
-			console.log({
-				id: action.id,
-				text: action.text,
-				due_date: action.due_date,
-				completed: false
-			});
 			return {
 				id: action.id,
 				text: action.text,
@@ -61,7 +54,7 @@ const visibilityFilter = (state = 'SHOW_ALL', action) => {
 	}
 }
 
-const sortingFilter = (state = 'NONE', action) => {
+const sortingFilter = (state = 'CREATED', action) => {
 	switch(action.type){
 		case 'SET_SORTING_FILTER':
 			return action.filter;
@@ -165,13 +158,14 @@ const Link = ({
 	if(active){
 		return <span> {children} </span>;
 	}
-	return <a href = '#' 
+	return <a href = '#'
 		onClick = {e => {
 			e.preventDefault();
 			onClick();
-		}}>
-			{children}
-		</a>
+		}}
+	>
+		{children}
+	</a>
 }
 const mapStateToFilterLinkProps = (
 	state,
@@ -220,14 +214,83 @@ const Footer = () => (
 	</p>
 );
 
+const Button = ({
+	active,
+	onClick,
+	children
+}) => {
+	if(active){
+		return <span>{children}</span>
+	}
+	return <a href = '#'
+		onClick = {e => {
+			e.preventDefault();
+			onClick();
+		}}
+	>
+		{children}
+	</a>
+	// return <span
+	// 	onClick = {() => {
+	// 		onClick();
+	// 	}}
+	// 	style = {{
+	// 		color: active?
+	// 			'red':
+	// 			'black'
+	// 	}}
+	// >
+	// 		{children}
+	// </span>
+}
+const mapStateToSortButton = (
+	state,
+	ownProps
+) => {
+	return({
+		active:
+			ownProps.filter ===
+			state.sortingFilter
+	});
+}
+const mapDispatchToSortButton = (
+	dispatch,
+	ownProps
+) => {
+	return({
+		onClick: () => 
+			dispatch(setSortingFilter(ownProps))
+	});
+}
+const SortButton = connect(
+	mapStateToSortButton,
+	mapDispatchToSortButton
+)(Button);
+
+const SortDropdown = () => (
+	<div>
+		<span>Sort by</span>
+		<SortButton
+			filter = 'CREATED'
+		>
+			Created
+		</SortButton>
+		<SortButton
+			filter = 'ALPHABETICAL'
+		>
+			Alphabetical
+		</SortButton>
+	</div>
+);
+
 //todo list
 const TodoList = ({
-	todos,
+	visibletodos,
 	onTodoClick
 }) => (
 	<ul>
 		{
-			todos.map(todo => 
+			visibletodos.map(todo => 
 			<Todo
 				key = {todo.id}
 				{...todo}
@@ -237,16 +300,16 @@ const TodoList = ({
 	</ul>
 );
 const mapStateToToDoListProps = (state) => {
-	let todos = getVisibleTodos(
+	let visibletodos = getVisibleTodos(
 		state.visibilityFilter,
 		state.todos
 	);
-	todos = sortTodos(
+	visibletodos = sortTodos(
 		state.sortingFilter,
-		todos
+		visibletodos
 	);
 	return ({
-		todos
+		visibletodos
 	});
 }
 const mapDispatchToToDoListProps = (dispatch) => {
@@ -266,6 +329,7 @@ const TodoApp = ({
 }) => (
 	<div>
 		<AddTodo />
+		<SortDropdown />
 		<VisibleTodoList />
 		<Footer />
 	</div>
@@ -297,9 +361,9 @@ const sortTodos = (
 				return a.text > b.text;
 			});
 		case 'CREATED':
-			return todos;
-		case 'DATE':
-			return todos;
+			return todos.sort( (a,b) => {
+				return a.id < b.id;
+			});
 		default:
 			return todos;
 	}
