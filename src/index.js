@@ -34,6 +34,11 @@ const todo = (state, action) => {
 const todos = (state = [], action) => {
 	switch (action.type) {
 		case 'ADD_TODO':
+			console.log('adding todo');
+			console.log([
+				...state,
+				todo(undefined, action)
+			]);
 			return [
 				...state,
 				todo(undefined, action)
@@ -219,29 +224,18 @@ const Button = ({
 	onClick,
 	children
 }) => {
-	if(active){
-		return <span>{children}</span>
-	}
-	return <a href = '#'
-		onClick = {e => {
-			e.preventDefault();
+	return <span
+		onClick = {() => {
 			onClick();
 		}}
+		style = {{
+			color: active?
+				'red':
+				'black'
+		}}
 	>
-		{children}
-	</a>
-	// return <span
-	// 	onClick = {() => {
-	// 		onClick();
-	// 	}}
-	// 	style = {{
-	// 		color: active?
-	// 			'red':
-	// 			'black'
-	// 	}}
-	// >
-	// 		{children}
-	// </span>
+			{children}
+	</span>
 }
 const mapStateToSortButton = (
 	state,
@@ -269,12 +263,13 @@ const SortButton = connect(
 
 const SortDropdown = () => (
 	<div>
-		<span>Sort by</span>
+		<span>Sort by </span>
 		<SortButton
 			filter = 'CREATED'
 		>
 			Created
 		</SortButton>
+		{', '}
 		<SortButton
 			filter = 'ALPHABETICAL'
 		>
@@ -339,15 +334,16 @@ const getVisibleTodos = (
 	filter,
 	todos
 ) => {
+	let visibletodos = todos.slice();
 	switch(filter){
 		case 'SHOW_ALL':
-			return todos;
+			return visibletodos;
 		case 'SHOW_ACTIVE':
-			return todos.filter( todo => !todo.completed);
+			return visibletodos.filter( todo => !todo.completed);
 		case 'SHOW_COMPLETED':
-			return todos.filter( todo => todo.completed);
+			return visibletodos.filter( todo => todo.completed);
 		default:
-			return todos;
+			return visibletodos;
 	}
 }
 
@@ -357,13 +353,16 @@ const sortTodos = (
 ) => {
 	switch(filter){
 		case 'ALPHABETICAL':
+			console.log('rendering alphabetical');
 			return todos.sort( (a, b) => {
 				return a.text > b.text;
 			});
 		case 'CREATED':
-			return todos.sort( (a,b) => {
-				return a.id < b.id;
-			});
+			console.log('rendering created');
+			// return todos.sort( (a,b) => {
+			// 	return a.id < b.id;
+			// });
+			return todos;
 		default:
 			return todos;
 	}
