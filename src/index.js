@@ -7,6 +7,7 @@ import deepFreeze from 'deep-freeze'
 import PropTypes from 'prop-types';
 import { Provider, connect } from 'react-redux';
 import { DragSource } from 'react-dnd';
+import styles from './style.css'
 //import { ItemTypes } from './Constants';
 
 const todo = (state, action) => {
@@ -34,11 +35,6 @@ const todo = (state, action) => {
 const todos = (state = [], action) => {
 	switch (action.type) {
 		case 'ADD_TODO':
-			console.log('adding todo');
-			console.log([
-				...state,
-				todo(undefined, action)
-			]);
 			return [
 				...state,
 				todo(undefined, action)
@@ -111,9 +107,12 @@ const Todo = ({
 	text,
 	due_date
 }) => {
-	let description_text = <span>{text + ' '}</span>;
+	console.log('styles:');
+	console.log(styles);
+	let className = styles.Todo;
+	let description_text = <span className = {className} >{text + ' '}</span>;
 	let date_text = due_date !== undefined?
-		<span>Due: {due_date}</span>:
+		<span className = {className} >Due: {due_date}</span>:
 		undefined;
 	return <li
 		onClick = { onClick }
@@ -353,15 +352,10 @@ const sortTodos = (
 ) => {
 	switch(filter){
 		case 'ALPHABETICAL':
-			console.log('rendering alphabetical');
 			return todos.sort( (a, b) => {
 				return a.text > b.text;
 			});
 		case 'CREATED':
-			console.log('rendering created');
-			// return todos.sort( (a,b) => {
-			// 	return a.id < b.id;
-			// });
 			return todos;
 		default:
 			return todos;
